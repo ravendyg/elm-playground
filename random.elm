@@ -1,4 +1,5 @@
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Random
 
@@ -37,7 +38,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [ h1 [] [ text (toString model.dieFace) ]
+    [ -- h1 [] [ text (toString model.dieFace) ]
+      img [ src ("https://wpclipart.com/recreation/games/dice/die_face_" ++ (toString model.dieFace) ++ ".png") ] []
     , button [ onClick Roll ] [ text "Roll" ]
     ]
 
