@@ -14,23 +14,28 @@ main =
 -- MODEL
 
 type alias Model =
-  { dieFace : Int
+  { dieFace1 : Int
+  , dieFace2 : Int
   }
 
 
 -- UPDATE
 
 type Msg = Roll
-  | NewFace Int
+  | NewFace1 Int
+  | NewFace2 Int
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Roll ->
-      ( model, Random.generate NewFace (Random.int 1 6) )
+      ( model, Random.generate NewFace1 (Random.int 1 6) )
 
-    NewFace newFace ->
-      ( Model newFace, Cmd.none )
+    NewFace1 newFace ->
+      ( {model | dieFace1 = newFace}, Random.generate NewFace2 (Random.int 1 6) )
+
+    NewFace2 newFace ->
+      ( {model | dieFace2 = newFace}, Cmd.none )
 
 
 -- VIEW
@@ -38,8 +43,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [ -- h1 [] [ text (toString model.dieFace) ]
-      img [ src ("https://wpclipart.com/recreation/games/dice/die_face_" ++ (toString model.dieFace) ++ ".png") ] []
+    [ img [ src ("https://wpclipart.com/recreation/games/dice/die_face_" ++ (toString model.dieFace1) ++ ".png") ] []
+    , img [ src ("https://wpclipart.com/recreation/games/dice/die_face_" ++ (toString model.dieFace2) ++ ".png") ] []
     , button [ onClick Roll ] [ text "Roll" ]
     ]
 
@@ -55,4 +60,4 @@ subscriptions model =
 
 init : (Model, Cmd Msg)
 init =
-  (Model 1, Cmd.none)
+  ({dieFace1 = 1, dieFace2 = 1}, Cmd.none)
