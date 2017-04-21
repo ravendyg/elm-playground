@@ -45,50 +45,59 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   let
-    angleSec =
-      -- turns (Time.inMinutes model)
-      getSecAngle model
+    angleSec = getAngle (getSeconds model)
+    angleMin = getAngle (getMinutes model)
+    angleHou = getAngle (getHours model)
 
-    handSecX =
-      toString (50 + 40 * cos angleSec)
+    handSecX = toString (50 + 40 * cos angleSec)
+    handSecY = toString (50 + 40 * sin angleSec)
 
-    handSecY =
-      toString (50 + 40 * sin angleSec)
+    handMinX = toString (50 + 35 * cos angleMin)
+    handMinY = toString (50 + 35 * sin angleMin)
 
-    minutes = getMinutes model
-    angleMin =
-      turns (Time.inHours model)
-
-    handMinX =
-      toString (40 + 40 * cos angleMin)
-
-    handMinY =
-      toString (40 + 40 * sin angleMin)
+    handHouX = toString (50 + 30 * cos angleHou)
+    handHouY = toString (50 + 30 * sin angleHou)
 
   in
-    -- Debug.log (toString (Time.inMinutes model))
-    Debug.log (toString (angleSec))
-    -- Debug.log (toString (cos (Time.inMinutes model)))
-    -- Debug.log (toString (cos (toFloat (ceiling (Time.inMinutes model)))))
-    -- Debug.log (toString (turns (Time.inMinutes model) / 60))
-    -- Debug.log (toString (Time.inMinutes model))
-    -- Debug.log (toString (ceiling (Time.inMinutes model)))
-    -- Debug.log (toString minutes)
     svg [ viewBox "0 0 100 100", width "300px" ]
       [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
       , line [ x1 "50", y1 "50", x2 handSecX, y2 handSecY, stroke "#023963" ] []
-      -- , line [ x1 "50", y1 "50", x2 handMinX, y2 handMinY, stroke "#523963" ] []
+      , line [ x1 "50", y1 "50", x2 handMinX, y2 handMinY, stroke "#523963" ] []
+      , line [ x1 "50", y1 "50", x2 handHouX, y2 handHouY, stroke "#029963" ] []
       ]
 
 
-getSeconds : Time -> Int
+getAngle : Float -> Float
+getAngle units =
+  units / 60 * 2 * pi - pi / 2
+
+
+getTspInSeconds : Time -> Int
+getTspInSeconds tsp =
+  round (Time.inSeconds tsp)
+
+getSeconds : Time -> Float
 getSeconds tsp =
-  rem (ceiling (Time.inSeconds tsp)) 60
+  toFloat (rem (getTspInSeconds tsp) 60)
 
-getSecAngle : Time -> Float
-getSecAngle tsp =
-  (toFloat (getSeconds tsp)) / 60 * 2 * pi - pi / 2
-
-getMinutes : Time -> Int
+getMinutes : Time -> Float
 getMinutes tsp =
-  rem (ceiling (Time.inMinutes tsp)) 60
+  let
+    sec = (getTspInSeconds tsp)
+    min = (toFloat sec) / 60
+    more = floor ((toFloat sec) / 60 / 60)
+  in
+    min - (toFloat more) * 60
+
+
+getHours : Time -> Float
+getHours tsp =
+  let
+    sec = (getTspInSeconds tsp)
+    hou = (toFloat sec) / 60 / 60
+    more = floor ((toFloat sec) / 60 / 60 / 24)
+    diff = hou - ((toFloat more) * 24)
+    di = if (diff + 7 >= 12) then diff - 12 else diff
+  in
+    -- +7 is a timezone hack, have found no way to get it programmaticaly
+    (diff + 7) / 12 * 60
