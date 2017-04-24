@@ -1,4 +1,5 @@
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Time exposing(Time, second)
@@ -58,14 +59,49 @@ view model =
     handHouX = toString (50 + 30 * cos angleHou)
     handHouY = toString (50 + 30 * sin angleHou)
 
-  in
-    svg [ viewBox "0 0 100 100", width "300px" ]
-      [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
-      , line [ x1 "50", y1 "50", x2 handSecX, y2 handSecY, stroke "#023963" ] []
-      , line [ x1 "50", y1 "50", x2 handMinX, y2 handMinY, stroke "#523963" ] []
-      , line [ x1 "50", y1 "50", x2 handHouX, y2 handHouY, stroke "#029963" ] []
-      ]
+    ticks = List.range 0 11
 
+  in
+    div [ Html.Attributes.style [("textAlign", "center")] ] [
+      svg [ viewBox "0 0 100 100", Svg.Attributes.width "300px" ]
+        (List.concat [
+          [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
+          , line [ x1 "50", y1 "50", x2 handSecX, y2 handSecY, stroke "#023963" ] []
+          , line [ x1 "50", y1 "50", x2 handMinX, y2 handMinY, stroke "#523963" ] []
+          , line [ x1 "50", y1 "50", x2 handHouX, y2 handHouY, stroke "#029963" ] []
+          ]
+          , List.map getTick (List.range 0 59)
+        ])
+      , getDigitalClock (getNumericTime model)
+    ]
+
+-- SVG
+getTick : Int -> Svg Msg
+getTick count =
+  let
+    out = 45
+    tickLen = if rem count 5 == 0 then 5 else 2
+    angl = (toFloat count) / 60 * 2 * pi
+    x1_ = toString (50 + (out - tickLen) * cos angl)
+    y1_ = toString (50 + (out - tickLen) * sin angl)
+    x2_ = toString (50 + out * cos angl)
+    y2_ = toString (50 + out * sin angl)
+  in
+    line [ x1 x1_, y1 y1_, x2 x2_, y2 y2_, stroke "#000000" ] []
+
+-- HTML
+
+getDigitalClock : String -> Html Msg
+getDigitalClock val =
+  div [ ] [
+    Html.text val
+  ]
+
+-- style : List (String, String) -> Html.Attribute msg
+-- style =
+--   VirtualDom.style
+
+-- HELPERS
 
 getAngle : Float -> Float
 getAngle units =
@@ -101,3 +137,23 @@ getHours tsp =
   in
     -- +7 is a timezone hack, have found no way to get it programmaticaly
     (diff + 7) / 12 * 60
+
+indentTime : Int -> String
+indentTime input =
+  let
+    str = toString input
+  in
+    if String.length str == 1
+    then "0" ++ str
+    else str
+
+getNumericTime : Time -> String
+getNumericTime time =
+  let
+    tsp = (getTspInSeconds time)
+    sec = rem tsp 60
+    min = (tsp % (60 * 60)) // 60
+    hou = (tsp % (60 * 60 * 24)) // (60 * 60) + 7
+  in
+    (indentTime hou) ++ ":" ++ (indentTime min) ++ ":" ++ (indentTime sec)
+
