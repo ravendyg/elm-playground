@@ -1,5 +1,3 @@
-port module Main exposing (..)
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Svg exposing (..)
@@ -7,16 +5,21 @@ import Svg.Attributes exposing (..)
 import Time exposing(Time, second)
 
 
-
 main =
-  Html.program
+  Html.programWithFlags
   { init = init
   , view = view
   , update = update
   , subscriptions = subscriptions
   }
 
+
 -- MODEL
+
+type alias Flags =
+  { offset : Int
+  , zone : String
+  }
 
 type alias Model =
   { time : Time
@@ -24,11 +27,11 @@ type alias Model =
   , zone : String
   }
 
-init : (Model, Cmd Msg)
-init =
+init : Flags -> (Model, Cmd Msg)
+init flags =
   ({time = 0
-  , offset = 0
-  , zone = ""
+  , offset = flags.offset
+  , zone = flags.zone
   }, Cmd.none)
 
 
@@ -36,7 +39,6 @@ init =
 
 type Msg =
   Tick Time
-  | GetTimezone (List String)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -44,34 +46,12 @@ update msg model =
     Tick newTime ->
       ({model | time = newTime}, Cmd.none)
 
-    GetTimezone newZone ->
-      let
-        zn =
-          case List.head newZone of
-            Just val -> val
-            Nothing -> "0"
-        offs = case String.toInt (
-          case List.head (List.drop 1 newZone) of
-            Just val -> val
-            Nothing -> "0"
-        ) of
-          Ok val -> val
-          Err msg -> 0
-      in
-        ({model | zone = zn, offset = offs}, Cmd.none)
-
-
 
 -- SUBSCRIPTIONS
 
-port getTimezone : (List String -> msg) -> Sub msg
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.batch
-    [ Time.every second Tick
-    , getTimezone GetTimezone
-    ]
+  Time.every second Tick
 
 
 -- VIEW
@@ -127,6 +107,7 @@ getTick count =
   in
     line [ x1 x1_, y1 y1_, x2 x2_, y2 y2_, stroke "#000000" ] []
 
+
 -- HTML
 
 getDigitalClock : String -> Html Msg
@@ -135,9 +116,6 @@ getDigitalClock val =
     Html.text val
   ]
 
--- style : List (String, String) -> Html.Attribute msg
--- style =
---   VirtualDom.style
 
 -- HELPERS
 
