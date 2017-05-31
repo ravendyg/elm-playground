@@ -65,3 +65,12 @@ getSize model =
 getFontSizeName : FontSize -> String
 getFontSizeName size =
   "Small"
+
+
+radiobutton : (String, msg, String) -> Html msg
+radiobutton (name, msg, selected_) =
+  Debug.log (toString (name == selected_))
+  label []
+    [ input [ type_ "radio", selected False, onClick msg ] []
+    , text name
+    ]

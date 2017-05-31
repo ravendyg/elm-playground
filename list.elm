@@ -45,6 +45,6 @@ renderItem : Lst String -> Html Msg
 renderItem node =
     case node of
         Empty ->
-            div [] [text "end" ]
+            div [] [ text "end" ]
         Node st rest ->
             div [] [ text st ]
