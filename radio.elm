@@ -1,7 +1,8 @@
 import Html exposing (..)
+import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 
-import Picker
+-- import Picker
 
 main =
   Html.beginnerProgram
@@ -45,13 +46,19 @@ view model =
   let
     size = getSize model
   in
-    div []
+    -- div []
+    --   [ p [ Html.Attributes.style [("fontSize", size)] ] [ text model.content ]
+    --   , Picker.viewPicker
+    --       [ ("Small", SwitchTo Small, getFontSizeName model.fontSize)
+    --       , ("Medium", SwitchTo Medium, getFontSizeName model.fontSize)
+    --       , ("Large", SwitchTo Large, getFontSizeName model.fontSize)
+    --       ]
+    --   ]
+        div []
       [ p [ Html.Attributes.style [("fontSize", size)] ] [ text model.content ]
-      , Picker.viewPicker
-          [ ("Small", SwitchTo Small, getFontSizeName model.fontSize)
-          , ("Medium", SwitchTo Medium, getFontSizeName model.fontSize)
-          , ("Large", SwitchTo Large, getFontSizeName model.fontSize)
-          ]
+      , radiobutton (Small, model.fontSize, SwitchTo Small)
+      , radiobutton (Medium, model.fontSize, SwitchTo Medium)
+      , radiobutton (Large, model.fontSize, SwitchTo Large)
       ]
 
 
@@ -64,13 +71,18 @@ getSize model =
 
 getFontSizeName : FontSize -> String
 getFontSizeName size =
-  "Small"
+  case model.fontSize of
+    Small  -> "Small"
+    Medium -> "Medium"
+    Large  -> "Large"
 
 
-radiobutton : (String, msg, String) -> Html msg
-radiobutton (name, msg, selected_) =
-  Debug.log (toString (name == selected_))
-  label []
-    [ input [ type_ "radio", selected False, onClick msg ] []
-    , text name
-    ]
+radiobutton : (FontSize, FontSize, msg) -> Html msg
+radiobutton (self, fontSize, msg) =
+  let
+    selected_ = self == fontSize
+  in
+    label []
+      [ input [ type_ "radio", name "font-size", checked selected_, onClick msg ] []
+      , text (toString self)
+      ]
