@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>Elm Playground</title>
+    </head>
+    <body>
+        <div id="main"></div>
+        <script src="main.js"></script>
+        <script>
+            var node = document.getElementById('main');
+            var [zone, off] = (new Date()).toString().slice(25,38).split(/\s\(/);
+            var offset = parseInt(off);
+            var app = Elm.Main.embed(node, {
+                zone, offset
+            });
+        </script>
+    </body>
+</html>
