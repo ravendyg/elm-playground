@@ -2,6 +2,9 @@ module App exposing (..)
 
 import Html exposing (Html, div, text, button, program)
 import Html.Events exposing (onClick)
+import Mouse
+import Keyboard
+import Random
 
 
 -- MODEL
@@ -11,6 +14,9 @@ type alias Model =
     { text : String
     , flag : Bool
     , val : Int
+    , x : Int
+    , y : Int
+    , ran : Int
     }
 
 
@@ -19,6 +25,9 @@ init =
     ( { text = "Hello"
       , flag = False
       , val = 0
+      , x = 0
+      , y = 0
+      , ran = 0
       }
     , Cmd.none
     )
@@ -34,6 +43,10 @@ type Msg
     | Expand
     | Collapse
     | Increment Int
+    | KeyMsg Keyboard.KeyCode
+    | MouseMsg Mouse.Position
+    | MouseClick Mouse.Position
+    | OnResult Int
 
 
 
@@ -57,6 +70,10 @@ view model =
         div []
             [ header
             , text <| toString model.val
+            , div []
+                [ text <| "Coordinates: " ++ (toString model.x) ++ ", " ++ (toString model.y) ]
+            , div []
+                [ text <| "Random: " ++ (toString model.ran) ]
             ]
 
 
@@ -82,6 +99,22 @@ update msg model =
         Increment inc ->
             ( { model | val = model.val + inc }, Cmd.none )
 
+        KeyMsg code ->
+            parseKeyCode model code
+
+        MouseMsg position ->
+            let
+                { x, y } =
+                    position
+            in
+                ( { model | x = x, y = y }, Cmd.none )
+
+        MouseClick position ->
+            ( model, Random.generate OnResult (Random.int 0 10) )
+
+        OnResult ran ->
+            ( { model | ran = ran }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -89,7 +122,17 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    if model.val < 10 then
+        Sub.batch
+            [ Keyboard.ups KeyMsg
+            , Mouse.moves MouseMsg
+            , Mouse.clicks MouseClick
+            ]
+    else
+        Sub.batch
+            [ Keyboard.ups KeyMsg
+            , Mouse.clicks MouseClick
+            ]
 
 
 
@@ -104,3 +147,16 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+parseKeyCode : Model -> Keyboard.KeyCode -> ( Model, Cmd Msg )
+parseKeyCode model code =
+    case code of
+        107 ->
+            ( { model | val = model.val + 1 }, Cmd.none )
+
+        109 ->
+            ( { model | val = model.val - 1 }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
