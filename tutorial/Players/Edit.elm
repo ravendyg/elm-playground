@@ -60,5 +60,6 @@ listBtn =
     a
         [ class "btn regular"
         , href playersPath
+        , Routing.onLinkClick <| Msgs.ChangeLocation Routing.playersPath
         ]
         [ i [ class "fa fa-chevron-left mr1" ] [], text "List" ]

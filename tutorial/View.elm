@@ -59,4 +59,3 @@ notFoundView =
     div []
         [ text "Not found"
         ]
-

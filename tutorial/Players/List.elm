@@ -78,5 +78,6 @@ editBtn player =
         a
             [ class "btn regular"
             , Html.Attributes.href path
+            , Routing.onLinkClick <| Msgs.ChangeLocation path
             ]
             [ i [ class "fa fa-pencil mr1" ] [], text "Edit" ]
