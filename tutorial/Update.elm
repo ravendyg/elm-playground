@@ -1,9 +1,11 @@
 module Update exposing (..)
 
 import Msgs exposing (Msg(..))
-import Models exposing (Model)
+import Models exposing (Model, Player)
 import Routing exposing (parseLocation)
 import Navigation
+import Commands exposing (savePlayerCmd)
+import RemoteData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -21,3 +23,34 @@ update msg model =
 
         Msgs.ChangeLocation path ->
             ( model, Navigation.newUrl path )
+
+        Msgs.ChangeLevel player howMuch ->
+            let
+                updatedPlayer =
+                    { player | level = player.level + howMuch }
+            in
+                ( model, savePlayerCmd updatedPlayer )
+
+        Msgs.OnPlayerSave (Ok player) ->
+            ( updatePlayer model player, Cmd.none )
+
+        Msgs.OnPlayerSave (Err player) ->
+            ( model, Cmd.none )
+
+
+updatePlayer : Model -> Player -> Model
+updatePlayer model updatedPlayer =
+    let
+        pick currentPlayer =
+            if updatedPlayer.id == currentPlayer.id then
+                updatedPlayer
+            else
+                currentPlayer
+
+        updatePlayerList players =
+            List.map pick players
+
+        updatedPlayers =
+            RemoteData.map updatePlayerList model.players
+    in
+        { model | players = updatedPlayers }
